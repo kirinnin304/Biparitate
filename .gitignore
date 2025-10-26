@@ -1,0 +1,11 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs/Kuhn
+/.vs/assessment-3/v17
+/.vs
+/Kuhn.sln
+/Kuhn.vcxproj
+/Kuhn.vcxproj.filters
+/Kuhn.vcxproj.user
