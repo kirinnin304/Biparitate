@@ -23,12 +23,15 @@ std::map<int, std::vector<int>> buildSearchGraph(std::vector<std::pair<int, int>
 }
 
 std::vector<std::pair<int, int>> fish(const std::vector<int> sideA, const std::vector<int> sideB, std::vector<std::pair<int, int>>& edges) {
-    std::cout << "start";
+    //setup
+
+    //mapping of vertices
     std::map<int, std::vector<int>> search = buildSearchGraph(edges);
 
     int aSize = sideA.size();
     int bSize = sideB.size();
 
+    //matchings where -1 is unmatched
     std::map<int, std::pair<int, int>> matchings;
     for (int i = 0; i < aSize + bSize; i++) {
         matchings[i] = { -1, 0 };
@@ -44,6 +47,7 @@ std::vector<std::pair<int, int>> fish(const std::vector<int> sideA, const std::v
     int aLoops = 1;
     std::vector<int> ends;
 
+    //initialising first layer of breadth first searches
     for (int i = 0; i < aSize; i++) {
         L1.push_back(sideA[i]);
     }
@@ -52,6 +56,7 @@ std::vector<std::pair<int, int>> fish(const std::vector<int> sideA, const std::v
         aFlag = true;
         bool bFlag = false;
         ends.clear();
+        //breadth first searches 
         while (true) {
             setSearch(searchG, layer);
             int cSize = (*currentLayer).size();
@@ -67,17 +72,21 @@ std::vector<std::pair<int, int>> fish(const std::vector<int> sideA, const std::v
 
             for (int i = 0; i < cSize; i++) {
                 int node = (*currentLayer)[i];
+
+                //even layers that traverse unmatched edges
                 if (aFlag) {
                     for (int j = 0; j < search[node].size(); j++) {
                         int t = search[node][j];
                         searchG[layer][t].push_back(node);
                         newLayer->push_back(t);
+
+                        //if unmatched meaning an augmenting path has been found
                         if (matchings[t].first < 0) {
                             ends.push_back(t);
                             bFlag = true;
                         }
                     }
-                }
+                } //odd layers that traverse matched edges
                 else {
                     if (matchings[(*currentLayer)[i]].second < aLoops) {
                         matchings[(*currentLayer)[i]].second = aLoops;
@@ -88,6 +97,7 @@ std::vector<std::pair<int, int>> fish(const std::vector<int> sideA, const std::v
                 }
             }
 
+            //flag ends breadth first search
             if (bFlag) { break; }
             std::swap(L1, L2);
             (*newLayer).clear();
@@ -97,12 +107,13 @@ std::vector<std::pair<int, int>> fish(const std::vector<int> sideA, const std::v
 
         std::vector<int> line;
         std::vector<int> mem;
+        //depth first searches
         for (int j = 0; j < ends.size(); j++) {
             line.clear();
             line.push_back(ends[j]);
+            //depth first search to find augmenting path
             for (int i = searchG.size() - 1; i >= 0; i--) {
                 std::vector<int> temp = (searchG[i])[line[line.size() - 1]];
-
                 bool memFlag = false;
                 for (int k = 0; k < (int)temp.size(); k++) {
                     if (std::find(mem.begin(), mem.end(), temp[k]) != mem.end()) {
@@ -116,7 +127,9 @@ std::vector<std::pair<int, int>> fish(const std::vector<int> sideA, const std::v
                     break;
                 }
             }
+            //if full path was found alter the alternating path
             if (line.size() - 1 == searchG.size()) {
+                //memory to prevent using same vertex more than once
                 mem.push_back(line[line.size() - 1]);
                 for (int i = searchG.size() - 1; i >= 0; i--) {
                     int ls = line.size();
@@ -135,6 +148,8 @@ std::vector<std::pair<int, int>> fish(const std::vector<int> sideA, const std::v
                 }
             }
         }
+
+        //preparing next set of breadth first seaches
         currentLayer->clear();
         for (int i = 0; i < (int)sideA.size(); i++) {
             if (matchings[sideA[i]].first == -1) {
