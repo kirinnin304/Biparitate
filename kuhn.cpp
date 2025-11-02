@@ -5,7 +5,7 @@
 std::map<int, std::vector<int>> buildSearchGraph(const std::vector<std::pair<int, int>>& edges) {
     std::map<int, std::vector<int>> adj;
     for (const auto& [u, v] : edges) {
-        adj[u].push_back(v); // from A → B
+        adj[u].push_back(v);
     }
     return adj;
 }
