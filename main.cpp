@@ -5,16 +5,37 @@
 #include <windows.h>
 #include "kuhn.hpp"
 
-//test with 1 element (edge case)
+void AssertPerfectMatching(const std::vector<int>& sideA,
+    const std::vector<int>& sideB,
+    const std::vector<std::pair<int, int>>& matching)
+{
+    ASSERT_EQ(sideA.size(), sideB.size())
+        << "A perfect matching requires both sides to have equal size.";
 
-/*std::string CompareResult(std::vector<std::pair<int, int>> result, std::vector<std::pair<int, int>> expected) {
-    for (int i = 0; i < expected.size(); i++) {
-        if (std::find(result.begin(), result.end(), expected[i]) != result.end()) {
-            return "result does not contain";
-        }
+    std::set<int> matchedA, matchedB;
+    for (const auto& [a, b] : matching) {
+        matchedA.insert(a);
+        matchedB.insert(b);
     }
-    return "e";
-}*/
+
+    // Matching is complete if all vertices are matched
+    for (int a : sideA) {
+        EXPECT_TRUE(matchedA.count(a) > 0)
+            << "Vertex " << a << " in left partition is unmatched.";
+    }
+
+
+    for (int b : sideB) {
+        EXPECT_TRUE(matchedB.count(b) > 0)
+            << "Vertex " << b << " in right partition is unmatched.";
+    }
+
+    // Ensure no duplicates vertexs
+    EXPECT_EQ(matchedA.size(), sideA.size())
+        << "Duplicate or missing matches on the left side.";
+    EXPECT_EQ(matchedB.size(), sideB.size())
+        << "Duplicate or missing matches on the right side.";
+}
 
 TEST(FastFourierTransform, simpleSeperateMatching) {
     std::vector<int> aSide;
@@ -587,6 +608,20 @@ TEST(FastFourierTransform, massive) {
     std::vector<std::pair<int, int>> out = kuhn(aSide, bSide, edges);
 
     EXPECT_EQ(out.size(), 20);
+
+    AssertPerfectMatching(aSide, bSide, out);
+}
+
+TEST(Kuhn, simpleSeperateMatching) {
+    std::vector<int> aSide = { 0, 1 };
+    std::vector<int> bSide = { 2, 3 };
+    std::vector<std::pair<int, int>> edges = {
+        {0, 2}, {1, 3}
+    };
+
+    auto result = kuhn(aSide, bSide, edges);
+
+    AssertPerfectMatching(aSide, bSide, result);
 }
 
 //main
